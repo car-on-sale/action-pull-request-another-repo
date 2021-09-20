@@ -49,9 +49,12 @@ echo "Creating folder"
 mkdir -p $CLONE_DIR/$INPUT_DESTINATION_FOLDER/
 cd "$CLONE_DIR"
 
+
+BRANCH_EXISTS=git show-ref "$INPUT_DESTINATION_HEAD_BRANCH"
+
 echo "Checking if branch already exists"
 git fetch -a
-if git show-ref "$INPUT_DESTINATION_HEAD_BRANCH"; 
+if [ -z $BRANCH_EXISTS ]; 
 then
     git checkout "$INPUT_DESTINATION_HEAD_BRANCH"
 else 
@@ -67,7 +70,7 @@ then
   git commit --message "$INPUT_COMMIT_MSG"
 
 
-  if git show-ref "$INPUT_DESTINATION_HEAD_BRANCH"; 
+  if [ -z $BRANCH_EXISTS ]; 
   then
     echo "Pushing git commit"
     git push -u origin HEAD:$INPUT_DESTINATION_HEAD_BRANCH
