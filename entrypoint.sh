@@ -54,10 +54,10 @@ BRANCH_EXISTS=$(git show-ref "$INPUT_DESTINATION_HEAD_BRANCH" | wc -l)
 
 echo "Checking if branch already exists"
 git fetch -a
-if [ $BRANCH_EXISTS == 1 ]; 
+if [ $BRANCH_EXISTS == 1 ];
 then
     git checkout "$INPUT_DESTINATION_HEAD_BRANCH"
-else 
+else
     git checkout -b "$INPUT_DESTINATION_HEAD_BRANCH"
 fi
 
@@ -69,18 +69,25 @@ if git status | grep -q "Changes to be committed"
 then
   git commit --message "$INPUT_COMMIT_MSG"
 
-
-  if [ $BRANCH_EXISTS == 1 ]; 
+  if [ $BRANCH_EXISTS == 1 ];
   then
     echo "Pushing git commit"
     git push -u origin HEAD:$INPUT_DESTINATION_HEAD_BRANCH
+
+    echo "Updating pull request"
+    CURRENT_BODY=$(gh pr view $INPUT_DESTINATION_HEAD_BRANCH --json body | jq '.body')
+    CURRENT_BODY=${CURRENT_BODY:1:${#CURRENT_BODY} - 2}
+
+    gh pr edit -b "$CURRENT_BODY
+    - https://github.com/$GITHUB_REPOSITORY/commit/$GITHUB_SHA"
   else
     echo "Pushing git commit"
     git push -u origin HEAD:$INPUT_DESTINATION_HEAD_BRANCH
 
     echo "Creating a pull request"
     gh pr create -t "$INPUT_PR_TITLE" \
-                 -b "Update from https://github.com/$GITHUB_REPOSITORY/commit/$GITHUB_SHA" \
+                 -b "Commit(s) from:
+                 - https://github.com/$GITHUB_REPOSITORY/commit/$GITHUB_SHA" \
                  -B $INPUT_DESTINATION_BASE_BRANCH \
                  -H $INPUT_DESTINATION_HEAD_BRANCH \
                     $PULL_REQUEST_REVIEWERS
