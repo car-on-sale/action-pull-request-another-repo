@@ -78,7 +78,7 @@ then
     CURRENT_BODY=$(gh pr view $INPUT_DESTINATION_HEAD_BRANCH --json body | jq '.body')
     CURRENT_BODY=${CURRENT_BODY:1:${#CURRENT_BODY} - 2}
 
-    gh pr edit -b "$CURRENT_BODY
+    gh pr edit $INPUT_DESTINATION_HEAD_BRANCH -b "$CURRENT_BODY
     - https://github.com/$GITHUB_REPOSITORY/commit/$GITHUB_SHA"
   else
     echo "Pushing git commit"
